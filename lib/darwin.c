@@ -21,6 +21,7 @@
 #include <CoreFoundation/CoreFoundation.h>
 #include <IOKit/IOKitLib.h>
 #include <IOKit/IOKitKeys.h>
+#include "DirectHW.h"
 
 enum {
     kACPIMethodAddressSpaceRead		= 0,
@@ -69,17 +70,25 @@ struct AddressSpaceParam {
 };
 typedef struct AddressSpaceParam AddressSpaceParam;
 
+static io_connect_t darwin1_connect = MACH_PORT_NULL;
+
 static void
-darwin_config(struct pci_access *a UNUSED)
+darwin1_config(struct pci_access *a UNUSED)
 {
+  /* config is called at launch */
+  darwin1_connect = MACH_PORT_NULL;
 }
 
 static int
-darwin_detect(struct pci_access *a)
+darwin1_detect(struct pci_access *a)
 {
+  /* detect is called if the user does not specify an access method */
   io_registry_entry_t    service;
-  io_connect_t           connect;
-  kern_return_t          status;
+  io_connect_t           connect = MACH_PORT_NULL;
+  kern_return_t          status = kIOReturnSuccess;
+
+  if (darwin1_connect != MACH_PORT_NULL)
+    return 1;
 
   service = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching("AppleACPIPlatformExpert"));
   if (service)
@@ -90,26 +99,33 @@ darwin_detect(struct pci_access *a)
 
   if (!service || (kIOReturnSuccess != status))
     {
-      a->warning("Cannot open AppleACPIPlatformExpert (add boot arg debug=0x144 & run as root)");
+      a->debug("...cannot open AppleACPIPlatformExpert (add boot arg debug=0x144 & run as root)");
       return 0;
     }
   a->debug("...using AppleACPIPlatformExpert");
-  a->fd = connect;
+  darwin1_connect = connect;
   return 1;
 }
 
 static void
-darwin_init(struct pci_access *a UNUSED)
+darwin1_init(struct pci_access *a UNUSED)
 {
+  /* init is called after detect or when the user specifies this access method */
+  if (darwin1_connect == MACH_PORT_NULL)
+    {
+      darwin1_detect(a);
+      a->debug("\n");
+    }
+  a->fd = darwin1_connect;
 }
 
 static void
-darwin_cleanup(struct pci_access *a UNUSED)
+darwin1_cleanup(struct pci_access *a UNUSED)
 {
 }
 
 static int
-darwin_read(struct pci_dev *d, int pos, byte *buf, int len)
+darwin1_read(struct pci_dev *d, int pos, byte *buf, int len)
 {
   if (!(len == 1 || len == 2 || len == 4))
     return pci_generic_block_read(d, pos, buf, len);
@@ -131,11 +147,11 @@ darwin_read(struct pci_dev *d, int pos, byte *buf, int len)
   param.value                = -1ULL;
 
   size_t outSize = sizeof(param);
-  status = IOConnectCallStructMethod(d->access->fd, kACPIMethodAddressSpaceRead,
+  status = MyIOConnectCallStructMethod(d->access->fd, kACPIMethodAddressSpaceRead,
     &param, sizeof(param),
     &param, &outSize);
   if ((kIOReturnSuccess != status))
-    d->access->error("darwin_read: kACPIMethodAddressSpaceRead failed: %s", mach_error_string(status));
+    d->access->error("darwin read failed: 0x%08x = %s", status, mach_error_string(status));
 
   switch (len)
     {
@@ -153,7 +169,7 @@ darwin_read(struct pci_dev *d, int pos, byte *buf, int len)
 }
 
 static int
-darwin_write(struct pci_dev *d, int pos, byte *buf, int len)
+darwin1_write(struct pci_dev *d, int pos, byte *buf, int len)
 {
   if (!(len == 1 || len == 2 || len == 4))
     return pci_generic_block_write(d, pos, buf, len);
@@ -187,11 +203,11 @@ darwin_write(struct pci_dev *d, int pos, byte *buf, int len)
     }
 
   size_t outSize = 0;
-  status = IOConnectCallStructMethod(d->access->fd, kACPIMethodAddressSpaceWrite,
+  status = MyIOConnectCallStructMethod(d->access->fd, kACPIMethodAddressSpaceWrite,
     &param, sizeof(param),
     NULL, &outSize);
   if ((kIOReturnSuccess != status))
-    d->access->error("darwin_read: kACPIMethodAddressSpaceWrite failed: %s", mach_error_string(status));
+    d->access->error("darwin write failed: 0x%08x = %s", status, mach_error_string(status));
 
   return 1;
 }
@@ -199,12 +215,12 @@ darwin_write(struct pci_dev *d, int pos, byte *buf, int len)
 struct pci_methods pm_darwin = {
     .name = "darwin",
     .help = "Darwin",
-    .config = darwin_config,
-    .detect = darwin_detect,
-    .init = darwin_init,
-    .cleanup = darwin_cleanup,
+    .config = darwin1_config,
+    .detect = darwin1_detect,
+    .init = darwin1_init,
+    .cleanup = darwin1_cleanup,
     .scan = pci_generic_scan,
     .fill_info = pci_generic_fill_info,
-    .read = darwin_read,
-    .write = darwin_write,
+    .read = darwin1_read,
+    .write = darwin1_write,
 };
