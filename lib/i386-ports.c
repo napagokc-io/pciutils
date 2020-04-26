@@ -32,6 +32,8 @@
 #include "i386-io-djgpp.h"
 #elif defined(PCI_OS_OPENBSD)
 #include "i386-io-openbsd.h"
+#elif defined(PCI_OS_DARWIN)
+#include "i386-io-darwin.h"
 #else
 #error Do not know how to access I/O ports on this OS.
 #endif
