@@ -459,6 +459,9 @@ pci_alloc(void)
   int i;
 
   memset(a, 0, sizeof(*a));
+  a->error = pci_generic_error;
+  a->warning = pci_generic_warn;
+  a->debug = pci_generic_debug;
   pci_init_name_list_path(a);
 #ifdef PCI_USE_DNS
   pci_init_dns(a);
@@ -473,46 +476,54 @@ pci_alloc(void)
 }
 
 int
+pci_detect(struct pci_access *a, int skip_method, int detectall)
+{
+  int first_detected_method = PCI_ACCESS_AUTO;
+  unsigned int i;
+  for (i=0; probe_sequence[i] >= 0; i++)
+  {
+    struct pci_methods *m = pci_methods[probe_sequence[i]];
+    if (!m)
+      continue;
+    if (skip_method == probe_sequence[i])
+       continue;
+    a->debug("Trying method %s...", m->name);
+    if (m->detect(a))
+    {
+      a->debug("...OK\n");
+      first_detected_method = probe_sequence[i];
+      if (!detectall)
+        break;
+    }
+    else
+      a->debug("...No.\n");
+  }
+  if (first_detected_method == PCI_ACCESS_AUTO) {
+    if (skip_method < 0) {
+      a->error("Cannot find any working access method.");
+    }
+  }
+  return first_detected_method;
+}
+
+int
 pci_init_internal(struct pci_access *a, int skip_method)
 {
-  if (!a->error)
-    a->error = pci_generic_error;
-  if (!a->warning)
-    a->warning = pci_generic_warn;
-  if (!a->debug)
-    a->debug = pci_generic_debug;
   if (!a->debugging)
     a->debug = pci_null_debug;
 
   if (a->method != PCI_ACCESS_AUTO)
-    {
-      if (a->method >= PCI_ACCESS_MAX || !pci_methods[a->method])
-	a->error("This access method is not supported.");
-      a->methods = pci_methods[a->method];
-    }
+  {
+    if (a->method >= PCI_ACCESS_MAX || !pci_methods[a->method])
+      a->error("This access method is not supported.");
+  }
   else
-    {
-      unsigned int i;
-      for (i=0; probe_sequence[i] >= 0; i++)
-	{
-	  struct pci_methods *m = pci_methods[probe_sequence[i]];
-	  if (!m)
-	    continue;
-	  if (skip_method == probe_sequence[i])
-	    continue;
-	  a->debug("Trying method %s...", m->name);
-	  if (m->detect(a))
-	    {
-	      a->debug("...OK\n");
-	      a->methods = m;
-	      a->method = probe_sequence[i];
-	      break;
-	    }
-	  a->debug("...No.\n");
-	}
-      if (!a->methods)
-	return 0;
-    }
+  {
+    a->method = pci_detect(a, skip_method, 0);
+  }
+  a->methods = pci_methods[a->method];
+  if (!a->methods)
+    return 0;
   a->debug("Decided to use %s\n", a->methods->name);
   a->methods->init(a);
   return 1;
@@ -521,8 +532,7 @@ pci_init_internal(struct pci_access *a, int skip_method)
 void
 pci_init_v35(struct pci_access *a)
 {
-  if (!pci_init_internal(a, -1))
-    a->error("Cannot find any working access method.");
+  pci_init_internal(a, -1);
 }
 
 STATIC_ALIAS(void pci_init(struct pci_access *a), pci_init_v35(a));

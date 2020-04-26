@@ -96,6 +96,7 @@ struct pci_access {
 
 /* Initialize PCI access */
 struct pci_access *pci_alloc(void) PCI_ABI;
+int pci_detect(struct pci_access *, int, int) PCI_ABI;
 void pci_init(struct pci_access *) PCI_ABI;
 void pci_cleanup(struct pci_access *) PCI_ABI;
 
