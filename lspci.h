@@ -28,7 +28,7 @@
 /*** Options ***/
 
 extern int verbose;
-extern struct pci_filter filter;
+extern struct pci_filter gfilter;
 extern char *opt_pcimap;
 
 /*** PCI devices and access to their config space ***/

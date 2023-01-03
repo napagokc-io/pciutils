@@ -44,26 +44,26 @@ struct op {
   struct value values[0];
 };
 
-struct group {
-  struct group *next;
+struct pci_group {
+  struct pci_group *next;
   struct pci_filter filter;
   struct op *first_op;
   struct op **last_op;
 };
 
-static struct group *first_group, **last_group = &first_group;
+static struct pci_group *first_group, **last_group = &first_group;
 static int need_bus_scan;
 static unsigned int max_values[] = { 0, 0xff, 0xffff, 0, 0xffffffff };
 
 static int
-matches_single_device(struct group *group)
+matches_single_device(struct pci_group *group)
 {
   struct pci_filter *f = &group->filter;
   return (f->domain >= 0 && f->bus >= 0 && f->slot >= 0 && f->func >= 0);
 }
 
 static struct pci_dev **
-select_devices(struct group *group)
+select_devices(struct pci_group *group)
 {
   struct pci_filter *f = &group->filter;
 
@@ -223,7 +223,7 @@ exec_op(struct op *op, struct pci_dev *dev)
 static void
 execute(void)
 {
-  struct group *group;
+  struct pci_group *group;
   int group_cnt = 0;
 
   for (group = first_group; group; group = group->next)
@@ -250,7 +250,7 @@ execute(void)
 static void
 scan_ops(void)
 {
-  struct group *group;
+  struct pci_group *group;
   struct op *op;
 
   for (group = first_group; group; group = group->next)
@@ -539,7 +539,7 @@ parse_options(int argc, char **argv)
   return i;
 }
 
-static int parse_filter(int argc, char **argv, int i, struct group *group)
+static int parse_filter(int argc, char **argv, int i, struct pci_group *group)
 {
   char *c = argv[i++];
   char *d;
@@ -657,7 +657,7 @@ static void parse_register(struct op *op, char *base)
   parse_err("Unknown register \"%s\"", base);
 }
 
-static void parse_op(char *c, struct group *group)
+static void parse_op(char *c, struct pci_group *group)
 {
   char *base, *offset, *width, *value, *number;
   char *e, *f;
@@ -774,9 +774,9 @@ static void parse_op(char *c, struct group *group)
     }
 }
 
-static struct group *new_group(void)
+static struct pci_group *new_group(void)
 {
-  struct group *g = xmalloc(sizeof(*g));
+  struct pci_group *g = xmalloc(sizeof(*g));
 
   memset(g, 0, sizeof(*g));
   pci_filter_init(pacc, &g->filter);
@@ -789,7 +789,7 @@ static struct group *new_group(void)
 
 static void parse_ops(int argc, char **argv, int i)
 {
-  struct group *group = NULL;
+  struct pci_group *group = NULL;
 
   while (i < argc)
     {

@@ -19,7 +19,7 @@
 
 int verbose;				/* Show detailed information */
 static int opt_hex;			/* Show contents of config space as hexadecimal numbers */
-struct pci_filter filter;		/* Device filter */
+struct pci_filter gfilter;		/* Device filter */
 static int opt_filter;			/* Any filter was given */
 static int opt_tree;			/* Show bus tree */
 static int opt_path;			/* Show bridge path */
@@ -122,7 +122,7 @@ scan_device(struct pci_dev *p)
 
   if (p->domain && !opt_domains)
     opt_domains = 1;
-  if (!pci_filter_match(&filter, p) && !need_topology)
+  if (!pci_filter_match(&gfilter, p) && !need_topology)
     return NULL;
   d = xmalloc(sizeof(struct device));
   memset(d, 0, sizeof(*d));
@@ -1100,7 +1100,7 @@ show(void)
   struct device *d;
 
   for (d=first_dev; d; d=d->next)
-    if (pci_filter_match(&filter, d->dev))
+    if (pci_filter_match(&gfilter, d->dev))
       show_device(d);
 }
 
@@ -1120,7 +1120,7 @@ main(int argc, char **argv)
 
   pacc = pci_alloc();
   pacc->error = die;
-  pci_filter_init(pacc, &filter);
+  pci_filter_init(pacc, &gfilter);
 
   while ((i = getopt(argc, argv, options)) != -1)
     switch (i)
@@ -1135,12 +1135,12 @@ main(int argc, char **argv)
 	pacc->buscentric = 1;
 	break;
       case 's':
-	if (msg = pci_filter_parse_slot(&filter, optarg))
+	if (msg = pci_filter_parse_slot(&gfilter, optarg))
 	  die("-s: %s", msg);
 	opt_filter = 1;
 	break;
       case 'd':
-	if (msg = pci_filter_parse_id(&filter, optarg))
+	if (msg = pci_filter_parse_id(&gfilter, optarg))
 	  die("-d: %s", msg);
 	opt_filter = 1;
 	break;
@@ -1220,7 +1220,7 @@ main(int argc, char **argv)
       if (need_topology)
 	grow_tree();
       if (opt_tree)
-	show_forest(opt_filter ? &filter : NULL);
+	show_forest(opt_filter ? &gfilter : NULL);
       else
 	show();
     }

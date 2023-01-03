@@ -54,7 +54,7 @@ map_bridge(struct bus_info *bi, struct device *d, int np, int ns, int nl)
 static void
 do_map_bus(int bus)
 {
-  int domain = (filter.domain >= 0 ? filter.domain : 0);
+  int domain = (gfilter.domain >= 0 ? gfilter.domain : 0);
   int dev, func;
   int verbose = pacc->debugging;
   struct bus_info *bi = bus_info + bus;
@@ -63,11 +63,11 @@ do_map_bus(int bus)
   if (verbose)
     printf("Mapping bus %04x:%02x\n", domain, bus);
   for (dev = 0; dev < 32; dev++)
-    if (filter.slot < 0 || filter.slot == dev)
+    if (gfilter.slot < 0 || gfilter.slot == dev)
       {
 	int func_limit = 1;
 	for (func = 0; func < func_limit; func++)
-	  if (filter.func < 0 || filter.func == func)
+	  if (gfilter.func < 0 || gfilter.func == func)
 	    {
 	      struct pci_dev *p = pci_get_dev(pacc, domain, bus, dev, func);
 	      u16 vendor = pci_read_word(p, PCI_VENDOR_ID);
@@ -172,8 +172,8 @@ map_the_bus(void)
     printf("WARNING: Bus mapping can be reliable only with direct hardware access enabled.\n\n");
   bus_info = xmalloc(sizeof(struct bus_info) * 256);
   memset(bus_info, 0, sizeof(struct bus_info) * 256);
-  if (filter.bus >= 0)
-    do_map_bus(filter.bus);
+  if (gfilter.bus >= 0)
+    do_map_bus(gfilter.bus);
   else
     {
       int bus;
