@@ -9,3 +9,10 @@ example
 update-pciids
 pci.ids.gz
 pcilmr
+project.xcworkspace
+DerivedData
+xcuserdata
+xcshareddata
+*.mode1v3
+*.pbxuser
+.DS_Store
