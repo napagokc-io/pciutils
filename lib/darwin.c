@@ -212,6 +212,24 @@ darwin1_write(struct pci_dev *d, int pos, byte *buf, int len)
   return 1;
 }
 
+static void
+darwin1_scan(struct pci_access *a)
+{
+  int domain;
+  int bus_number;
+  byte busmap[256];
+
+  /* setting segment for kIOACPIAddressSpaceIDPCIConfiguration doesn't seem to do anything so we'll just do one domain */
+  for (domain = 0; domain < 1; domain++) {
+    memset(busmap, 0, sizeof(busmap));
+    for (bus_number = 0; bus_number < 0x100; bus_number++) {
+      if (!busmap[bus_number]) {
+        pci_generic_scan_bus(a, busmap, domain, bus_number);
+      }
+    }
+  }
+}
+
 struct pci_methods pm_darwin = {
     .name = "darwin",
     .help = "Darwin",
@@ -219,7 +237,7 @@ struct pci_methods pm_darwin = {
     .detect = darwin1_detect,
     .init = darwin1_init,
     .cleanup = darwin1_cleanup,
-    .scan = pci_generic_scan,
+    .scan = darwin1_scan,
     .fill_info = pci_generic_fill_info,
     .read = darwin1_read,
     .write = darwin1_write,
