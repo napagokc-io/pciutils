@@ -98,8 +98,12 @@ Read the contents of configuration registers from a file specified in the
 parameter. The format corresponds to the output of \fIlspci\fP \fB-x\fP.
 .TP
 .B darwin
-Access method used on Mac OS X / Darwin. Must be run as root and the system
-must have been booted with debug=0x144.
+Access method used on Mac OS X / Darwin since Mac OS X 10.6 Snow Leopard.
+Must be run as root and the system must have been booted with debug=0x144.
+.TP
+.B darwin2
+Access method used on Mac OS X / Darwin since OS X 10.10 Yosemite.
+Must be run as root and the system must have been booted with debug=0x144.
 .TP
 .B win32-cfgmgr32
 Device listing on Windows systems using the Windows Configuration Manager

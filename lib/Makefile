@@ -54,6 +54,7 @@ endif
 
 ifdef PCI_HAVE_PM_DARWIN_DEVICE
 OBJS += darwin
+OBJS += darwin2
 endif
 
 ifdef PCI_OS_DARWIN
