@@ -44,6 +44,7 @@ enum pci_access_type {
   PCI_ACCESS_DUMP,			/* Dump file */
   PCI_ACCESS_DARWIN,			/* Darwin */
   PCI_ACCESS_DARWIN2,			/* Darwin 2 */
+  PCI_ACCESS_DARWIN3,			/* Darwin 3 */
   PCI_ACCESS_SYLIXOS_DEVICE,		/* SylixOS pci */
   PCI_ACCESS_HURD,			/* GNU/Hurd */
   PCI_ACCESS_WIN32_CFGMGR32,		/* Win32 cfgmgr32.dll */

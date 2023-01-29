@@ -119,7 +119,9 @@ static struct pci_methods *pci_methods[PCI_ACCESS_MAX] = {
 #ifdef PCI_HAVE_PM_DARWIN_DEVICE
   &pm_darwin,
   &pm_darwin2,
+  &pm_darwin3,
 #else
+  NULL,
   NULL,
   NULL,
 #endif
@@ -178,6 +180,7 @@ static int probe_sequence[] = {
   PCI_ACCESS_OBSD_DEVICE,
   PCI_ACCESS_DARWIN,
   PCI_ACCESS_DARWIN2,
+  PCI_ACCESS_DARWIN3,
   PCI_ACCESS_SYLIXOS_DEVICE,
   PCI_ACCESS_HURD,
   PCI_ACCESS_WIN32_CFGMGR32,

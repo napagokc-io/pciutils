@@ -29,7 +29,7 @@ In runs on the following systems:
 	CYGWIN		(direct port access)
 	BeOS		(via syscalls)
 	Haiku		(via /dev/misc/poke)
-	Darwin		(via IOKit)
+	Darwin		(via IOKit <AppleACPIPlatformExpert, IOPCIBridge, or DirectHW> or i386 ports <DirectHW>)
 	DOS/DJGPP	(via i386 ports)
 	SylixOS		(via /proc/pci)
 	AmigaOS on PPC	(via Expansion library)
