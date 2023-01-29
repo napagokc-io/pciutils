@@ -9,6 +9,7 @@
  */
 
 #include "internal.h"
+#include <stddef.h>
 
 static u32
 ioflg_to_pciflg(pciaddr_t ioflg)

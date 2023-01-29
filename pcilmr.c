@@ -24,7 +24,8 @@ scan_links(struct pci_access *pacc, bool only_ready)
   else
     printf("Links with Lane Margining at the Receiver capabilities:\n");
   bool flag = true;
-  for (struct pci_dev *p = pacc->devices; p; p = p->next)
+  struct pci_dev *p;
+  for (p = pacc->devices; p; p = p->next)
     {
       if (pci_find_cap(p, PCI_EXT_CAP_ID_LMR, PCI_CAP_EXTENDED) && margin_port_is_down(p))
         {
@@ -68,7 +69,8 @@ main(int argc, char **argv)
   pci_scan_bus(pacc);
 
   margin_print_domain = false;
-  for (struct pci_dev *dev = pacc->devices; dev; dev = dev->next)
+  struct pci_dev *dev;
+  for (dev = pacc->devices; dev; dev = dev->next)
     {
       if (dev->domain != 0)
         {
@@ -121,7 +123,8 @@ main(int argc, char **argv)
   results_n = xmalloc(links_n * sizeof(*results_n));
   checks_status_ports = xmalloc(links_n * sizeof(*checks_status_ports));
 
-  for (int i = 0; i < links_n; i++)
+  int i;
+  for (i = 0; i < links_n; i++)
     {
       enum margin_test_status args_status;
 
@@ -137,7 +140,8 @@ main(int argc, char **argv)
       struct margin_params params;
       struct margin_link_args *link_args = &links[i].args;
 
-      for (int j = 0; j < link_args->recvs_n; j++)
+      int j;
+      for (j = 0; j < link_args->recvs_n; j++)
         {
           if (margin_read_params(
                 pacc, link_args->recvs[j] == 6 ? links[i].up_port.dev : links[i].down_port.dev,
@@ -165,7 +169,7 @@ main(int argc, char **argv)
         }
     }
 
-  for (int i = 0; i < links_n; i++)
+  for (i = 0; i < links_n; i++)
     {
       if (checks_status_ports[i])
         results[i] = margin_test_link(&links[i], &results_n[i]);
@@ -195,7 +199,7 @@ main(int argc, char **argv)
       printf("THR -\tThe set (using the utility options) \n\tstep threshold has been reached\n\n");
       printf("Notations:\nst - steps\n\n");
 
-      for (int i = 0; i < links_n; i++)
+      for (i = 0; i < links_n; i++)
         {
           printf("Link ");
           margin_log_bdfs(links[i].down_port.dev, links[i].up_port.dev);
@@ -207,7 +211,7 @@ main(int argc, char **argv)
         }
     }
 
-  for (int i = 0; i < links_n; i++)
+  for (i = 0; i < links_n; i++)
     margin_free_results(results[i], results_n[i]);
   free(results_n);
   free(results);

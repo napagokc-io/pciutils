@@ -236,7 +236,8 @@ margin_test_lanes(struct margin_lanes_data arg)
   bool failed_lanes[32] = { 0 };
   u8 alive_lanes = arg.lanes_n;
 
-  for (int i = 0; i < arg.lanes_n; i++)
+  int i;
+  for (i = 0; i < arg.lanes_n; i++)
     {
       margin_set_cmd(arg.recv->dev, arg.results[i].lane, NO_COMMAND);
       margin_set_cmd(arg.recv->dev, arg.results[i].lane,
@@ -255,7 +256,7 @@ margin_test_lanes(struct margin_lanes_data arg)
       else
         step_cmd = SET_REG_MASK(step_cmd, LMR_PLD_MARGIN_V_STEPS, steps_done);
 
-      for (int i = 0; i < arg.lanes_n; i++)
+      for (i = 0; i < arg.lanes_n; i++)
         {
           if (!failed_lanes[i])
             {
@@ -266,7 +267,7 @@ margin_test_lanes(struct margin_lanes_data arg)
         }
       msleep(arg.recv->dwell_time * 1000);
 
-      for (int i = 0; i < arg.lanes_n; i++)
+      for (i = 0; i < arg.lanes_n; i++)
         {
           if (!failed_lanes[i])
             {
@@ -292,7 +293,7 @@ margin_test_lanes(struct margin_lanes_data arg)
       margin_log_margining(arg);
     }
 
-  for (int i = 0; i < arg.lanes_n; i++)
+  for (i = 0; i < arg.lanes_n; i++)
     {
       margin_set_cmd(arg.recv->dev, arg.results[i].lane, NO_COMMAND);
       margin_set_cmd(arg.recv->dev, arg.results[i].lane, CLEAR_ERROR_LOG(arg.recv->recvn));
@@ -363,7 +364,8 @@ margin_test_receiver(struct margin_dev *dev, u8 recvn, struct margin_link_args *
   margin_log_receiver(&recv);
 
   results->lanes = xmalloc(sizeof(struct margin_res_lane) * lanes_n);
-  for (int i = 0; i < lanes_n; i++)
+  int i;
+  for (i = 0; i < lanes_n; i++)
     {
       results->lanes[i].lane
         = recv.lane_reversal ? dev->max_width - lanes_to_margin[i] - 1 : lanes_to_margin[i];
@@ -392,7 +394,7 @@ margin_test_receiver(struct margin_dev *dev, u8 recvn, struct margin_link_args *
           lanes_data.lanes_n = use_lanes;
           lanes_data.results = results->lanes + lanes_done;
 
-          for (int i = 0; i < 4; i++)
+          for (i = 0; i < 4; i++)
             {
               bool timing = dir[i] == TIM_LEFT || dir[i] == TIM_RIGHT;
               if (!timing && !params.volt_support)
@@ -417,7 +419,7 @@ margin_test_receiver(struct margin_dev *dev, u8 recvn, struct margin_link_args *
         margin_log("\n");
       if (recv.lane_reversal)
         {
-          for (int i = 0; i < lanes_n; i++)
+          for (i = 0; i < lanes_n; i++)
             results->lanes[i].lane = lanes_to_margin[i];
         }
     }
@@ -486,19 +488,20 @@ margin_process_args(struct margin_link *link)
 {
   struct margin_dev *dev = &link->down_port;
   struct margin_link_args *args = &link->args;
+  int i;
 
   u8 receivers_n = 2 + 2 * dev->retimers_n;
 
   if (!args->recvs_n)
     {
-      for (int i = 1; i < receivers_n; i++)
+      for (i = 1; i < receivers_n; i++)
         args->recvs[i - 1] = i;
       args->recvs[receivers_n - 1] = 6;
       args->recvs_n = receivers_n;
     }
   else
     {
-      for (int i = 0; i < args->recvs_n; i++)
+      for (i = 0; i < args->recvs_n; i++)
         {
           u8 recvn = args->recvs[i];
           if (recvn < 1 || recvn > 6 || (recvn != 6 && recvn > receivers_n - 1))
@@ -511,12 +514,12 @@ margin_process_args(struct margin_link *link)
   if (!args->lanes_n)
     {
       args->lanes_n = dev->neg_width;
-      for (int i = 0; i < args->lanes_n; i++)
+      for (i = 0; i < args->lanes_n; i++)
         args->lanes[i] = i;
     }
   else
     {
-      for (int i = 0; i < args->lanes_n; i++)
+      for (i = 0; i < args->lanes_n; i++)
         {
           if (args->lanes[i] >= dev->neg_width)
             {
@@ -551,7 +554,8 @@ margin_test_link(struct margin_link *link, u8 *recvs_n)
   if (status)
     {
       struct margin_dev *dut;
-      for (int i = 0; i < receivers_n; i++)
+      int i;
+      for (i = 0; i < receivers_n; i++)
         {
           dut = receivers[i] == 6 ? &link->up_port : &link->down_port;
           margin_test_receiver(dut, receivers[i], args, &results[i]);
@@ -567,7 +571,8 @@ margin_test_link(struct margin_link *link, u8 *recvs_n)
 void
 margin_free_results(struct margin_results *results, u8 results_n)
 {
-  for (int i = 0; i < results_n; i++)
+  int i;
+  for (i = 0; i < results_n; i++)
     {
       if (results[i].test_status == MARGIN_TEST_OK)
         free(results[i].lanes);

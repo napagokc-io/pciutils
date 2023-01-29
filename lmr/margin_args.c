@@ -50,7 +50,8 @@ dev_for_filter(struct pci_access *pacc, char *filter)
   if (pci_filter.domain == -1)
     pci_filter.domain = 0;
 
-  for (struct pci_dev *p = pacc->devices; p; p = p->next)
+  struct pci_dev *p;
+  for (p = pacc->devices; p; p = p->next)
     {
       if (pci_filter_match(&pci_filter, p))
         return p;
@@ -77,7 +78,8 @@ static u8
 find_ready_links(struct pci_access *pacc, struct margin_link *links, bool cnt_only)
 {
   u8 cnt = 0;
-  for (struct pci_dev *p = pacc->devices; p; p = p->next)
+  struct pci_dev *p;
+  for (p = pacc->devices; p; p = p->next)
     {
       if (pci_find_cap(p, PCI_EXT_CAP_ID_LMR, PCI_CAP_EXTENDED) && margin_port_is_down(p))
         {
@@ -155,7 +157,8 @@ parse_dev_args(int argc, char **argv, struct margin_link_args *args, u8 link_spe
                 }
 
               int consumed = 0;
-              for (int i = 0; i < 3; i++)
+              int i;
+              for (i = 0; i < 3; i++)
                 if (cons[i] > consumed)
                   consumed = cons[i];
               if ((size_t)consumed != strlen(optarg))
@@ -261,7 +264,8 @@ margin_parse_util_args(struct pci_access *pacc, int argc, char **argv, enum marg
         {
           links = xmalloc(ports_n * sizeof(*links));
           find_ready_links(pacc, links, false);
-          for (int i = 0; i < ports_n; i++)
+          int i;
+          for (i = 0; i < ports_n; i++)
             init_link_args(&(links[i].args), com_args);
         }
     }

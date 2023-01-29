@@ -25,7 +25,8 @@ detect_unique_hw(struct pci_dev *dev)
   u16 device = pci_read_word(dev, PCI_DEVICE_ID);
   u8 revision = pci_read_byte(dev, PCI_REVISION_ID);
 
-  for (int i = 0; special_hw[i][0] != 0xFFFF; i++)
+  int i;
+  for (i = 0; special_hw[i][0] != 0xFFFF; i++)
     {
       if (vendor == special_hw[i][0] && device == special_hw[i][1] && revision == special_hw[i][2])
         return special_hw[i][3];
@@ -58,7 +59,8 @@ margin_find_pair(struct pci_access *pacc, struct pci_dev *dev, struct pci_dev **
     return false;
   bool given_down = margin_port_is_down(dev);
 
-  for (struct pci_dev *p = pacc->devices; p; p = p->next)
+  struct pci_dev *p;
+  for (p = pacc->devices; p; p = p->next)
     {
       if (given_down && pci_read_byte(dev, PCI_SECONDARY_BUS) == p->bus && dev->domain == p->domain
           && p->func == 0)

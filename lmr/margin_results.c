@@ -69,7 +69,8 @@ margin_results_print_brief(struct margin_results *results, u8 recvs_n,
                            "Invalid receivers specified with arguments",
                            "Couldn't disable ASPM" };
 
-  for (int i = 0; i < recvs_n; i++)
+  int i;
+  for (i = 0; i < recvs_n; i++)
     {
       res = &(results[i]);
       params = res->params;
@@ -160,7 +161,8 @@ margin_results_print_brief(struct margin_results *results, u8 recvs_n,
                "reliable.\n\n",
                10 + res->recvn - 1);
 
-      for (int j = 0; j < res->lanes_n; j++)
+      int j;
+      for (j = 0; j < res->lanes_n; j++)
         {
           if (spec_ref_only)
             lane_rating = INIT;
@@ -251,7 +253,8 @@ margin_results_save_csv(struct margin_results *results, u8 recvs_n, struct margi
 
   struct pci_dev *port;
 
-  for (int i = 0; i < recvs_n; i++)
+  int i;
+  for (i = 0; i < recvs_n; i++)
     {
       res = &(results[i]);
       params = res->params;
@@ -297,8 +300,10 @@ margin_results_save_csv(struct margin_results *results, u8 recvs_n, struct margi
           eh_rec = margin_eh_rec[link_speed];
         }
 
-      for (int j = 0; j < res->lanes_n; j++)
+      int j;
+      for (j = 0; j < res->lanes_n; j++)
         {
+          int k;
           if (spec_ref_only)
             lane_rating = INIT;
           else
@@ -357,7 +362,7 @@ margin_results_save_csv(struct margin_results *results, u8 recvs_n, struct margi
                     lane->steps[TIM_RIGHT], sts_strings[lane->statuses[TIM_RIGHT]]);
           else
             {
-              for (int k = 0; k < 4; k++)
+              for (k = 0; k < 4; k++)
                 fprintf(csv, "NA,");
             }
           if (params.volt_support)
@@ -372,7 +377,7 @@ margin_results_save_csv(struct margin_results *results, u8 recvs_n, struct margi
             }
           else
             {
-              for (int k = 0; k < 5; k++)
+              for (k = 0; k < 5; k++)
                 fprintf(csv, "NA,");
               fprintf(csv, "NA\n");
             }

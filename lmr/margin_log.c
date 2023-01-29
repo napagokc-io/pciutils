@@ -58,7 +58,8 @@ margin_log_link(struct margin_link *link)
              link->down_port.link_speed);
   margin_log("Available receivers: ");
   int receivers_n = 2 + 2 * link->down_port.retimers_n;
-  for (int i = 1; i < receivers_n; i++)
+  int i;
+  for (i = 1; i < receivers_n; i++)
     margin_log("Rx(%X) - %d, ", 10 + i - 1, i);
   margin_log("Rx(F) - 6\n");
 }
@@ -124,7 +125,8 @@ margin_log_margining(struct margin_lanes_data arg)
       u8 lanes_counter = 0;
       margin_log(" - Lanes ");
       margin_log("[%d", arg.lanes_numbers[0]);
-      for (int i = 1; i < arg.lanes_n; i++)
+      int i;
+      for (i = 1; i < arg.lanes_n; i++)
         {
           if (arg.lanes_numbers[i] - 1 == arg.lanes_numbers[i - 1])
             {

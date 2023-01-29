@@ -177,8 +177,10 @@ endif
 ifeq ($(SHARED),yes)
 ifeq ($(LIBEXT),dylib)
 	ln -sf $(PCILIB) $(DESTDIR)$(LIBDIR)/$(LIBNAME).$(ABI_VERSION).$(LIBEXT)
-else ifeq ($(LIBEXT),so)
-	ln -sf $(PCILIB) $(DESTDIR)$(LIBDIR)/$(LIBNAME).$(LIBEXT).$(ABI_VERSION)
+else
+	ifeq ($(LIBEXT),so)
+		ln -sf $(PCILIB) $(DESTDIR)$(LIBDIR)/$(LIBNAME).$(LIBEXT).$(ABI_VERSION)
+	endif
 endif
 endif
 
@@ -210,9 +212,11 @@ ifeq ($(SHARED),yes)
 ifeq ($(LIBEXT),dylib)
 	ln -sf $(PCILIB) $(DESTDIR)$(LIBDIR)/$(LIBNAME).$(ABI_VERSION).$(LIBEXT)
 	ln -sf $(LIBNAME).$(ABI_VERSION).$(LIBEXT) $(DESTDIR)$(LIBDIR)/$(LIBNAME).$(LIBEXT)
-else ifeq ($(LIBEXT),so)
-	ln -sf $(PCILIB) $(DESTDIR)$(LIBDIR)/$(LIBNAME).$(LIBEXT).$(ABI_VERSION)
-	ln -sf $(LIBNAME).$(LIBEXT).$(ABI_VERSION) $(DESTDIR)$(LIBDIR)/$(LIBNAME).$(LIBEXT)
+else
+	ifeq ($(LIBEXT),so)
+		ln -sf $(PCILIB) $(DESTDIR)$(LIBDIR)/$(LIBNAME).$(LIBEXT).$(ABI_VERSION)
+		ln -sf $(LIBNAME).$(LIBEXT).$(ABI_VERSION) $(DESTDIR)$(LIBDIR)/$(LIBNAME).$(LIBEXT)
+	endif
 endif
 endif
 
