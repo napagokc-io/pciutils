@@ -137,11 +137,13 @@ case $sys in
 		echo >>$c '#define PCI_HAVE_PM_DARWIN_DEVICE'
 		echo >>$m 'WITH_LIBS+=-lresolv -framework CoreFoundation -framework IOKit'
 		echo >>$c '#define PCI_HAVE_64BIT_ADDRESS'
-		echo_n " i386-ports"
-		echo >>$c '#define PCI_HAVE_PM_INTEL_CONF'
+		if [ "$cpu" = "i386" -o "$cpu" = "x86_64" ] ; then
+			echo_n " i386-ports"
+			echo >>$c '#define PCI_HAVE_PM_INTEL_CONF'
+		fi
 		LIBRESOLV=
 		LIBEXT=dylib
-		SYSINCLUDE=$(xcrun --sdk macosx --show-sdk-path 2> /dev/null || : )/usr/include
+		SYSINCLUDE=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include
 		;;
 	aix)
 		echo_n " aix-device"

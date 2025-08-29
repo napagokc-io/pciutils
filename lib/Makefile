@@ -130,7 +130,7 @@ OBJS += dllrsrc
 endif
 CFLAGS += -fPIC -fvisibility=hidden
 $(PCILIB): $(addsuffix .o,$(OBJS))
-	$(CC) -shared $(CFLAGS) $(LDFLAGS) $(PCILIB_LDFLAGS) -o $@ $^ $(LIB_LDLIBS)
+	$(CC) -shared $(CFLAGS) $(LDFLAGS) $(TARGET_ARCH) $(PCILIB_LDFLAGS) -o $@ $^ $(LIB_LDLIBS)
 ifeq ($(LIBEXT),dll)
 $(PCILIB): build.def
 endif

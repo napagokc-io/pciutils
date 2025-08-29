@@ -2,7 +2,8 @@
 # (c) 1998--2024 Martin Mares <mj@ucw.cz>
 
 OPT=-O2
-CFLAGS=$(OPT) -Wall -W -Wno-parentheses -Wstrict-prototypes -Wmissing-prototypes
+CFLAGS=$(OPT) -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -arch x86_64 -arch arm64 -Wall -W -Wno-parentheses -Wstrict-prototypes -Wmissing-prototypes
+TARGET_ARCH=-isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -arch x86_64 -arch arm64
 
 VERSION=3.13.0
 DATE=2024-05-30
