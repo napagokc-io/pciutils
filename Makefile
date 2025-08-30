@@ -2,8 +2,47 @@
 # (c) 1998--2024 Martin Mares <mj@ucw.cz>
 
 OPT=-O2
-CFLAGS=$(OPT) -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -arch x86_64 -arch arm64 -Wall -W -Wno-parentheses -Wstrict-prototypes -Wmissing-prototypes
-TARGET_ARCH=-isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -arch x86_64 -arch arm64
+CFLAGS=$(OPT) -Wall -W -Wno-parentheses -Wstrict-prototypes -Wmissing-prototypes
+
+# Architecture detection for macOS
+ifeq ($(shell uname -s),Darwin)
+# Use Command Line Tools SDK if available, otherwise Xcode SDK
+CLT_SDK=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk
+XCODE_SDK=$(shell xcrun --show-sdk-path 2>/dev/null)
+SDK_PATH=$(shell if [ -d "$(CLT_SDK)" ]; then echo "$(CLT_SDK)"; else echo "$(XCODE_SDK)"; fi)
+
+# Test supported architectures more carefully
+# Only include architectures that have full library support
+SUPPORTED_ARCHS :=
+ifeq ($(shell uname -m),x86_64)
+# On Intel Macs, prefer x86_64
+SUPPORTED_ARCHS += x86_64
+else ifeq ($(shell uname -m),arm64)
+# On Apple Silicon Macs, prefer arm64
+SUPPORTED_ARCHS += arm64
+endif
+
+# Try to add additional architectures if they work
+ifeq ($(shell clang -arch x86_64 -isysroot "$(SDK_PATH)" -c /dev/null -o /dev/null 2>/dev/null && clang -arch x86_64 -isysroot "$(SDK_PATH)" -lz -o /dev/null /dev/null 2>/dev/null && echo yes),yes)
+SUPPORTED_ARCHS_EXTRA += x86_64
+endif
+ifeq ($(shell clang -arch arm64 -isysroot "$(SDK_PATH)" -c /dev/null -o /dev/null 2>/dev/null && clang -arch arm64 -isysroot "$(SDK_PATH)" -lz -o /dev/null /dev/null 2>/dev/null && echo yes),yes)
+SUPPORTED_ARCHS_EXTRA += arm64
+endif
+
+# Use universal binary if we have multiple architectures
+ifneq ($(word 2,$(SUPPORTED_ARCHS_EXTRA)),)
+TARGET_ARCH += $(addprefix -arch ,$(SUPPORTED_ARCHS_EXTRA))
+else ifneq ($(SUPPORTED_ARCHS_EXTRA),)
+TARGET_ARCH += -arch $(SUPPORTED_ARCHS_EXTRA)
+endif
+
+# Set SDK path if available
+ifneq ($(SDK_PATH),)
+CFLAGS += -isysroot "$(SDK_PATH)"
+TARGET_ARCH += -isysroot "$(SDK_PATH)"
+endif
+endif
 
 VERSION=3.13.0
 DATE=2024-05-30
